@@ -33,10 +33,10 @@ VALID_VISIT_METHODS = ['GET', 'POST']
 isValidVisitMethod = (method) ->
   _.includes(VALID_VISIT_METHODS, method)
 
-timedOutWaitingForPageLoad = (ms, log) ->
+timedOutWaitingForPageLoad = (ms, log, currentlyVisitingAboutBlank) ->
   $utils.throwErrByPath("navigation.timed_out", {
     onFail: log
-    args: { ms }
+    args: { ms, currentlyVisitingAboutBlank }
   })
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
@@ -758,7 +758,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
-        timedOutWaitingForPageLoad(options.timeout, options._log)
+        timedOutWaitingForPageLoad(options.timeout, options._log, currentlyVisitingAboutBlank)
       .finally ->
         cleanup?()
 
