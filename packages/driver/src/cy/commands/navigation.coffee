@@ -33,10 +33,14 @@ VALID_VISIT_METHODS = ['GET', 'POST']
 isValidVisitMethod = (method) ->
   _.includes(VALID_VISIT_METHODS, method)
 
-timedOutWaitingForPageLoad = (ms, log, currentlyVisitingAboutBlank) ->
+timedOutWaitingForPageLoad = (ms, log, currentlyVisitingAboutBlank, consoleProps) ->
   $utils.throwErrByPath("navigation.timed_out", {
     onFail: log
-    args: { ms, currentlyVisitingAboutBlank }
+    args: {
+      ms,
+      aboutBlank: currentlyVisitingAboutBlank ? 'Yes' : 'No',
+      consolePropsJson: JSON.stringify(consoleProps)
+    }
   })
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
@@ -234,7 +238,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     cy.state("onPageLoadErr", null)
 
     try
-      timedOutWaitingForPageLoad(options.timeout, options._log)
+      timedOutWaitingForPageLoad(options.timeout, options._log, false, { happenedAt: 'loading' })
     catch err
       reject(err)
 
@@ -365,7 +369,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       reload()
       .timeout(options.timeout, "reload")
       .catch Promise.TimeoutError, (err) ->
-        timedOutWaitingForPageLoad(options.timeout, options._log)
+        timedOutWaitingForPageLoad(options.timeout, options._log, false, { happenedAt: 'reload' })
       .finally ->
         cleanup?()
 
@@ -438,7 +442,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         go()
         .timeout(options.timeout, "go")
         .catch Promise.TimeoutError, (err) ->
-          timedOutWaitingForPageLoad(options.timeout, options._log)
+          timedOutWaitingForPageLoad(options.timeout, options._log, false, { happenedAt: 'go' })
         .finally ->
           cleanup?()
 
@@ -758,7 +762,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
-        timedOutWaitingForPageLoad(options.timeout, options._log, currentlyVisitingAboutBlank)
+        timedOutWaitingForPageLoad(options.timeout, options._log, currentlyVisitingAboutBlank, consoleProps)
       .finally ->
         cleanup?()
 

@@ -500,7 +500,13 @@ module.exports = {
     timed_out: """
       Timed out after waiting '{{ms}}ms' for your remote page to load.
 
-      Was this while attempting to visit about:now? {{currentlyVisitingAboutBlank}}
+      ------------------------------ DEBUG ------------------------------
+
+      Was this while attempting to visit about:blank? {{aboutBlank}}
+
+      consoleProps = {{consolePropsJson}}
+
+      -------------------------------------------------------------------
 
       Your page did not fire its 'load' event within '{{ms}}ms'.
 
